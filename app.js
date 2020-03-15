@@ -22,7 +22,37 @@ var budgetController = (function () {
             exp: 0,
             inc: 0,
         }
-    }
+    };
+
+    return {
+        addItem: function (type, des, val) {
+            var newItem, ID;
+
+            //Create ID
+            if (data.allItems[type].length > 0) {
+                ID = data.allItems[type][data.allItems[type].length - 1].id + 1;
+            } else {
+                ID = 0
+            }
+            //Create newItem
+            if (type === 'exp') {
+                newItem = new Expense(ID, des, val);
+            } else if (type === 'inc') {
+                newItem = new Income(ID, des, val);
+            }
+
+            //Add data in stroage
+            data.allItems[type].push(newItem);
+
+            //Return the new element
+            return newItem;
+        },
+        test: function () {
+            console.log(data);
+        }
+
+
+    };
 
 })();
 
@@ -71,9 +101,13 @@ var Controller = (function (budgetCtr, UICtr) {
 
 
     var ctrlAddItem = function () {
-        //filed input value
-        var input = UICtr.getInput();
+        var input, newItem;
 
+        //filed input value
+        input = UICtr.getInput();
+
+        //Add item to storage
+        newItem = budgetCtr.addItem(input.type, input.description, input.value);
     };
     return {
         init: function () {
