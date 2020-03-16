@@ -1,29 +1,30 @@
 //budgetController #DATABASE
 var budgetController = (function () {
 
-    /************************************************************* */
+    /****Expense _ID, des, val_ ;************************************************** */
     var Expense = function (id, description, value) {
         this.id = id;
         this.description = description;
         this.value = value;
     };
 
-    /************************************************************ */
+    /***** Income _ID, des, val_ ; ******************************************************* */
     var Income = function (id, description, value) {
         this.id = id;
         this.description = description;
         this.value = value;
     };
 
-    /********************************************************** */
+    /** data.allItems[type][data.allItems[type]******************************************************** */
     var data = {
 
-        /****************************************************** */
+        /*** data.allItems[type]*************************************************** */
         allItems: {
             exp: [],
             inc: [],
         },
 
+        /*** data.totals[type]*************************************************** */
         totals: {
             exp: 0,
             inc: 0,
@@ -36,9 +37,11 @@ var budgetController = (function () {
     /***************************************************** */
     return {
         addItem: function (type, des, val) {
+
+
             var newItem, ID;
 
-            /********************************************************************** */
+            /** budgetController.ID ******************************************************************** */
             //Create ID
             if (data.allItems[type].length > 0) {
                 ID = data.allItems[type][data.allItems[type].length - 1].id + 1;
@@ -46,7 +49,7 @@ var budgetController = (function () {
                 ID = 0
             }
 
-            /************************************************************ */
+            /*** budgetController.newItem************************************************ */
             //Create newItem
             if (type === 'exp') {
                 newItem = new Expense(ID, des, val);
@@ -71,7 +74,7 @@ var budgetController = (function () {
 //UIController
 var UIController = (function () {
 
-    /*************************************************************** */
+    /*  DOMstring. ************************************************************** */
     var DOMstring = {
         inputType: '.add__type',
         inputDescription: '.add__description',
@@ -84,7 +87,7 @@ var UIController = (function () {
     /********************************************************** */
     return {
 
-        //********************************************************************************* *//
+        //*  UIController.return  ***************************************************************** *//
         getInput: function () {
             return {
                 type: document.querySelector(DOMstring.inputType).value, //  inc  OR  exp
@@ -93,13 +96,12 @@ var UIController = (function () {
             };
         },
 
-        //*********************************************************************************//
+        //*** UIController.addListItem  **************************************************************//
         addListItem: function (obj, type) {
 
             var html, newHtml, element;
 
-            //*Html*********************************************************************************/
-            // 
+            //*  UIController.addListItem.html **********************************************************************/ 
             if (type === 'inc') {
 
                 element = DOMstring.incomeContainer;
@@ -112,32 +114,54 @@ var UIController = (function () {
                 html = '<div class="item clearfix" id="expense-%id%"><div class="item__description">%description%</div><div class="right clearfix"><div class="item__value">%value%</div><div class="item__percentage">%%</div><div class="item__delete"><button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button></div></div></div>'
             }
 
-            /*****************************************************************************************/
+            /******* UIController.addListItem.newHtml**********************************************************************************/
             //input data in html
             newHtml = html.replace('%id%', obj.id);
             newHtml = newHtml.replace('%description%', obj.description);
             newHtml = newHtml.replace('%value%', obj.value);
 
-            /*************************************************************************************** */
-            //insert html to DOM
+            /*insert html to DOM******* element = DOMstring.expensesContainer _type_ *********************************** */
             document.querySelector(element).insertAdjacentHTML("beforeend", newHtml);
+
+
 
         },
 
-        /***************************************************** */
+
+
+        /** UIController.clearFields ******************************************* */
+        clearFields: function () {
+            var fields, fieldsArr;
+
+            /*****UIController.clearFields.fields == DOMstring.inputDescription & g.inputvalue value*************************************** */
+            fields = document.querySelectorAll(DOMstring.inputDescription + ',' + DOMstring.inputValue);
+
+            /*************casting fields to Array *****************************  */
+            fieldsArr = Array.prototype.slice.call(fields);
+
+            /***************** clean the add box  ******************** */
+            fieldsArr.forEach(function (current, index, array) {
+                current.value = "";
+            });
+            fieldsArr[0].focus();
+        },
+        /**UIController.******************************************* */
+
+        /**UIController.******************************************* */
+
+        /**  UIController.getDOMstring.  == protected value access ************************************************* */
         getDOMstring: function () {
             return DOMstring;
         },
 
-        /********************************************* */
     };
 
 })();
 //
-// Global appController
+// Global appController == main function 
 var Controller = (function (budgetCtr, UICtr) {
 
-    /************************************************************************************** */
+    /** Controller.init Allwyas Run setupEventListeners *************************************************************** */
     var setupEventListeners = function () {
         var DOM = UICtr.getDOMstring();
 
@@ -150,7 +174,7 @@ var Controller = (function (budgetCtr, UICtr) {
         });
     }
 
-    /**************************************************************************************** */
+    /****** main function********************************************************************************** */
     var ctrlAddItem = function () {
         var input, newItem;
 
@@ -162,9 +186,20 @@ var Controller = (function (budgetCtr, UICtr) {
 
         //add item to DOM
         UICtr.addListItem(newItem, input.type);
+
+        //Inpux bux clear
+        UICtr.clearFields();
+
+        //
+
+        //
+
+        //
+
+
     };
 
-    /************************************************************************************** */
+    /* Controller.init  ==> Controller.setupEventListeners Is Allwyas Run ********************* */
     return {
         init: function () {
             console.log('init has run.');
