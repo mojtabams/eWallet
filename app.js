@@ -70,8 +70,9 @@ var budgetController = (function () {
 
     /********************************************* */
 })();
-//
-//UIController
+
+/****************************************************************************/
+/*UIController***************************************************************/
 var UIController = (function () {
 
     /*  DOMstring. ************************************************************** */
@@ -92,7 +93,7 @@ var UIController = (function () {
             return {
                 type: document.querySelector(DOMstring.inputType).value, //  inc  OR  exp
                 description: document.querySelector(DOMstring.inputDescription).value,
-                value: document.querySelector(DOMstring.inputValue).value,
+                value: parseFloat(document.querySelector(DOMstring.inputValue).value),
             };
         },
 
@@ -157,8 +158,9 @@ var UIController = (function () {
     };
 
 })();
-//
-// Global appController == main function 
+
+/***************************************************************************/
+/* Global appController == main function **************************************/
 var Controller = (function (budgetCtr, UICtr) {
 
     /** Controller.init Allwyas Run setupEventListeners *************************************************************** */
@@ -174,6 +176,16 @@ var Controller = (function (budgetCtr, UICtr) {
         });
     }
 
+    /**** updateBudget ************************************************************************************ */
+    var updateBudget = function () {
+
+        //cal buget
+
+        //return buget
+
+        //display on UI
+
+    };
     /****** main function********************************************************************************** */
     var ctrlAddItem = function () {
         var input, newItem;
@@ -181,21 +193,19 @@ var Controller = (function (budgetCtr, UICtr) {
         //filed input value
         input = UICtr.getInput();
 
-        //Add item to storage
-        newItem = budgetCtr.addItem(input.type, input.description, input.value);
+        if (input.description != "" && !isNaN(input.value) && input.value > 0) {
+            //Add item to storage
+            newItem = budgetCtr.addItem(input.type, input.description, input.value);
 
-        //add item to DOM
-        UICtr.addListItem(newItem, input.type);
+            //add item to DOM
+            UICtr.addListItem(newItem, input.type);
 
-        //Inpux bux clear
-        UICtr.clearFields();
+            //Inpux bux clear
+            UICtr.clearFields();
 
-        //
-
-        //
-
-        //
-
+            //update buget
+            updateBudget();
+        }
 
     };
 
