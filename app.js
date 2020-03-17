@@ -187,6 +187,13 @@ var UIController = (function () {
 
         },
 
+        /***** UIController.deleteItemList ******************************************** */
+        deleteItemList: function(selectorID){
+            var el = document.getElementById(selectorID)
+            el.parentNode.removeChild(el);
+
+        },
+
         /** UIController.clearFields ******************************************* */
         clearFields: function () {
             var fields, fieldsArr;
@@ -288,6 +295,7 @@ var Controller = (function (budgetCtr, UICtr) {
 
         var itemID, splitID, type, ID;
 
+        //(inc or exp)-id
         itemID = event.target.parentNode.parentNode.parentNode.parentNode.id;
 
         if (itemID) {
@@ -300,6 +308,10 @@ var Controller = (function (budgetCtr, UICtr) {
             budgetCtr.deleteItem(type, ID);
 
             //delete from UI
+            UICtr.deleteItemList(itemID);
+            
+            //update buget
+            updateBudget();
 
         }
 
