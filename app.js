@@ -1,4 +1,4 @@
-//budgetController #DATABASE
+// #budgetController #DATABASE
 var budgetController = (function () {
 
     /****Expense _ID, des, val_ ;************************************************** */
@@ -13,6 +13,16 @@ var budgetController = (function () {
         this.id = id;
         this.description = description;
         this.value = value;
+    };
+
+    /*********************************************************** */
+    var calculateTotal = function (type) {
+        var sum = 0;
+
+        data.allItems[type].forEach(function (cur) {
+            sum += cur.value;
+        });
+        data.totals[type] = sum;
     };
 
     /** data.allItems[type][data.allItems[type]******************************************************** */
@@ -30,18 +40,23 @@ var budgetController = (function () {
             inc: 0,
         },
 
+        /************** data.budget**************** */
+        budget: 0,
+        percentage: -1
         /********************************************************* */
 
     };
 
-    /***************************************************** */
+    /****** budgetController. *********************************************** */
     return {
+
+        /****** budgetController.addItem *************************************************************** */
         addItem: function (type, des, val) {
 
 
             var newItem, ID;
 
-            /** budgetController.ID ******************************************************************** */
+            /** budgetController.addItem.ID ************************************************* */
             //Create ID
             if (data.allItems[type].length > 0) {
                 ID = data.allItems[type][data.allItems[type].length - 1].id + 1;
@@ -49,7 +64,7 @@ var budgetController = (function () {
                 ID = 0
             }
 
-            /*** budgetController.newItem************************************************ */
+            /*** budgetController.addItem.newItem************************************************ */
             //Create newItem
             if (type === 'exp') {
                 newItem = new Expense(ID, des, val);
@@ -66,13 +81,38 @@ var budgetController = (function () {
             return newItem;
         },
 
+        /*** budgetController.calculateBudget ************************************ */
+        calculateBudget: function () {
+
+            //totalIncome & totalexpenses       
+            calculateTotal('exp');
+            calculateTotal('inc');
+
+            // buget = income - expenses
+            data.budget = data.totals.inc - data.totals.exp;
+
+            //spent percentage 
+            if (data.totals.inc > 0) {
+                data.percentage = Math.round((data.totals.exp / data.totals.inc) * 100);
+            } else {
+                data.percentage = -1;
+            }
+        },
+
+        getBudget: function () {
+            return {
+                budget: data.budget,
+                totalInc: data.totals.inc,
+                totalExp: data.totals.exp,
+                percentage: data.percentage,
+            }
+        },
+
     };
 
-    /********************************************* */
 })();
 
-/****************************************************************************/
-/*UIController***************************************************************/
+// #UIController
 var UIController = (function () {
 
     /*  DOMstring. ************************************************************** */
@@ -83,9 +123,13 @@ var UIController = (function () {
         inputBtn: '.add__btn',
         incomeContainer: '.income__list',
         expensesContainer: '.expenses__list',
+        budgetLable: '.budget__value',
+        incomeLable: '.budget__income--value',
+        expenseLable: '.budget__expenses--value',
+        percentageLable: '.budget__expenses--percentage',
     }
 
-    /********************************************************** */
+    /*** UIController. ****************************************************** */
     return {
 
         //*  UIController.return  ***************************************************************** *//
@@ -106,13 +150,13 @@ var UIController = (function () {
             if (type === 'inc') {
 
                 element = DOMstring.incomeContainer;
-
                 html = '<div class="item clearfix" id="income-%id%"><div class="item__description">%description%</div><div class="right clearfix"><div class="item__value">%value%</div><div class="item__delete"><button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button></div></div></div>';
+
             } else if (type === 'exp') {
 
                 element = DOMstring.expensesContainer;
+                html = '<div class="item clearfix" id="expense-%id%"><div class="item__description">%description%</div><div class="right clearfix"><div class="item__value">%value%</div><div class="item__percentage">%%</div><div class="item__delete"><button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button></div></div></div>';
 
-                html = '<div class="item clearfix" id="expense-%id%"><div class="item__description">%description%</div><div class="right clearfix"><div class="item__value">%value%</div><div class="item__percentage">%%</div><div class="item__delete"><button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button></div></div></div>'
             }
 
             /******* UIController.addListItem.newHtml**********************************************************************************/
@@ -124,11 +168,7 @@ var UIController = (function () {
             /*insert html to DOM******* element = DOMstring.expensesContainer _type_ *********************************** */
             document.querySelector(element).insertAdjacentHTML("beforeend", newHtml);
 
-
-
         },
-
-
 
         /** UIController.clearFields ******************************************* */
         clearFields: function () {
@@ -146,11 +186,23 @@ var UIController = (function () {
             });
             fieldsArr[0].focus();
         },
+
+        /** UIController.displayBudget ******************************************* */
+        displayBudget: function (obj) {
+
+            document.querySelector(DOMstring.budgetLable).textContent = obj.budget;
+            document.querySelector(DOMstring.incomeLable).textContent = obj.totalInc;
+            document.querySelector(DOMstring.expenseLable).textContent = obj.totalExp;
+
+            if (obj.percentage > 0) {
+                document.querySelector(DOMstring.percentageLable).textContent = obj.percentage + '%';
+            } else {
+                document.querySelector(DOMstring.percentageLable).textContent = " --- ";
+            }
+        },
         /**UIController.******************************************* */
 
-        /**UIController.******************************************* */
-
-        /**  UIController.getDOMstring.  == protected value access ************************************************* */
+        /**  UIController.getDOMstring.  == protected value access  */
         getDOMstring: function () {
             return DOMstring;
         },
@@ -180,10 +232,13 @@ var Controller = (function (budgetCtr, UICtr) {
     var updateBudget = function () {
 
         //cal buget
+        budgetCtr.calculateBudget();
 
         //return buget
+        var budget = budgetCtr.getBudget();
 
         //display on UI
+        UICtr.displayBudget(budget);
 
     };
     /****** main function********************************************************************************** */
@@ -213,6 +268,11 @@ var Controller = (function (budgetCtr, UICtr) {
     return {
         init: function () {
             console.log('init has run.');
+            UICtr.displayBudget({
+                budget: 0,
+                totalInc: 0,
+                totalExp: 0,
+                percentage: -1,})
             setupEventListeners();
         }
     };
