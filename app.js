@@ -99,6 +99,7 @@ var budgetController = (function () {
             }
         },
 
+        /*** budgetController.getBudget  ********************************** */
         getBudget: function () {
             return {
                 budget: data.budget,
@@ -108,6 +109,21 @@ var budgetController = (function () {
             }
         },
 
+        /******** budgetController.deleteItem *****************************************/
+        deleteItem: function (type, id) {
+            var ids, index;
+
+            ids = data.allItems[type].map(function (current) {
+                return current.id;
+            });
+            index = ids.indexOf(id);
+            
+            if (index !== -1) {
+                
+                data.allItems[type].splice(index, 1);
+            }
+
+        }
     };
 
 })();
@@ -127,6 +143,7 @@ var UIController = (function () {
         incomeLable: '.budget__income--value',
         expenseLable: '.budget__expenses--value',
         percentageLable: '.budget__expenses--percentage',
+        container: '.container',
     }
 
     /*** UIController. ****************************************************** */
@@ -150,12 +167,12 @@ var UIController = (function () {
             if (type === 'inc') {
 
                 element = DOMstring.incomeContainer;
-                html = '<div class="item clearfix" id="income-%id%"><div class="item__description">%description%</div><div class="right clearfix"><div class="item__value">%value%</div><div class="item__delete"><button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button></div></div></div>';
+                html = '<div class="item clearfix" id="inc-%id%"><div class="item__description">%description%</div><div class="right clearfix"><div class="item__value">%value%</div><div class="item__delete"><button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button></div></div></div>';
 
             } else if (type === 'exp') {
 
                 element = DOMstring.expensesContainer;
-                html = '<div class="item clearfix" id="expense-%id%"><div class="item__description">%description%</div><div class="right clearfix"><div class="item__value">%value%</div><div class="item__percentage">%%</div><div class="item__delete"><button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button></div></div></div>';
+                html = '<div class="item clearfix" id="exp-%id%"><div class="item__description">%description%</div><div class="right clearfix"><div class="item__value">%value%</div><div class="item__percentage">%%</div><div class="item__delete"><button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button></div></div></div>';
 
             }
 
@@ -226,6 +243,8 @@ var Controller = (function (budgetCtr, UICtr) {
                 ctrlAddItem();
             }
         });
+
+        document.querySelector(DOM.container).addEventListener('click', ctrlDeleteItem);
     }
 
     /**** updateBudget ************************************************************************************ */
@@ -241,7 +260,7 @@ var Controller = (function (budgetCtr, UICtr) {
         UICtr.displayBudget(budget);
 
     };
-    /****** main function********************************************************************************** */
+    /****** main ADD  function************************************** */
     var ctrlAddItem = function () {
         var input, newItem;
 
@@ -264,6 +283,27 @@ var Controller = (function (budgetCtr, UICtr) {
 
     };
 
+    /*********** Delete Function **************************************** */
+    var ctrlDeleteItem = function (event) {
+
+        var itemID, splitID, type, ID;
+
+        itemID = event.target.parentNode.parentNode.parentNode.parentNode.id;
+
+        if (itemID) {
+
+            splitID = itemID.split('-');
+            type = splitID[0];
+            ID = parseInt( splitID[1]);
+
+            //delete from data
+            budgetCtr.deleteItem(type, ID);
+
+            //delete from UI
+
+        }
+
+    }
     /* Controller.init  ==> Controller.setupEventListeners Is Allwyas Run ********************* */
     return {
         init: function () {
@@ -272,14 +312,14 @@ var Controller = (function (budgetCtr, UICtr) {
                 budget: 0,
                 totalInc: 0,
                 totalExp: 0,
-                percentage: -1,})
+                percentage: -1,
+            })
             setupEventListeners();
         }
     };
 
-    /************************************************************************************ */
 
 })(budgetController, UIController);
 
-/************************************************************************************ */
+
 Controller.init();
